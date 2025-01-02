@@ -40,6 +40,7 @@ const SignUp = () => {
       updateUserProfile(fullName, image).then(() => {
         toast.success("Sign up successful! Welcome aboard!");
         navigate("/");
+        
       });
     });
   };

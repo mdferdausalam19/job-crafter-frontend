@@ -108,8 +108,8 @@ const Header = () => {
                     <img
                       referrerPolicy="no-referrer"
                       className="w-10 rounded-full border border-black"
-                      src={user.photoURL}
-                      alt="No Photo"
+                      src={user?.photoURL}
+                      alt="Users Photo"
                     />
                   ) : (
                     <FaRegUserCircle size={40} />
