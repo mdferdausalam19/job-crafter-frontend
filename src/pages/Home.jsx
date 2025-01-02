@@ -1,7 +1,11 @@
+import Banner from "../components/layouts/Banner";
+import JobCategories from "../features/jobCategories/JobCategories";
+
 const Home = () => {
   return (
     <div>
-      <h2>Welcome to the home page !!!</h2>
+      <Banner></Banner>
+      <JobCategories></JobCategories>
     </div>
   );
 };
