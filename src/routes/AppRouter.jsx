@@ -6,6 +6,9 @@ import SignUp from "../features/auth/SignUp";
 import NotFound from "../pages/NotFound";
 import PrivateRoute from "./PrivateRoute";
 import JobDetails from "../features/jobCategories/JobDetails";
+import AddJob from "../features/jobs/AddJob";
+import MyPostedJobs from "../features/jobs/MyPostedJobs";
+import UpdateJob from "../features/jobs/UpdateJob";
 
 export const router = createBrowserRouter([
   {
@@ -30,6 +33,30 @@ export const router = createBrowserRouter([
         element: (
           <PrivateRoute>
             <JobDetails></JobDetails>
+          </PrivateRoute>
+        ),
+      },
+      {
+        path: "/add-job",
+        element: (
+          <PrivateRoute>
+            <AddJob></AddJob>
+          </PrivateRoute>
+        ),
+      },
+      {
+        path: "/my-posted-jobs",
+        element: (
+          <PrivateRoute>
+            <MyPostedJobs></MyPostedJobs>
+          </PrivateRoute>
+        ),
+      },
+      {
+        path: "/update-job/:id",
+        element: (
+          <PrivateRoute>
+            <UpdateJob></UpdateJob>
           </PrivateRoute>
         ),
       },

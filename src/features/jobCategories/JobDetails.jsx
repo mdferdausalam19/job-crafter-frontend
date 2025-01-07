@@ -25,13 +25,14 @@ const JobDetails = () => {
     jobTitle,
     maxPrice,
     minPrice,
-    buyerEmail,
+    buyer,
     _id,
   } = jobDetails || {};
 
   const {
     register,
     handleSubmit,
+    reset,
     formState: { errors },
   } = useForm();
 
@@ -42,13 +43,13 @@ const JobDetails = () => {
       email: data.bidderEmail,
       comment: data.bidComment,
       userProposedDeadline: data.userProposedDeadline,
-      buyerEmail,
+      buyerEmail: buyer?.email,
       status: "Pending",
       jobTitle,
       category,
     };
 
-    if (user?.email === buyerEmail) {
+    if (user?.email === buyer?.email) {
       return toast.error("You cannot bid on your own job!");
     }
 
@@ -67,6 +68,7 @@ const JobDetails = () => {
       .then((res) => {
         if (res.data.insertedId) {
           toast.success("Your bid has been successfully submitted!");
+          reset();
         }
       })
       .catch(() => toast.error("Failed to submit the bid!"));
@@ -77,7 +79,10 @@ const JobDetails = () => {
       {/* Job Details */}
       <div className="flex-1 px-4 py-7 bg-white rounded-md shadow-md md:min-h-[350px] border">
         <div className="flex items-center justify-between">
-          <span className="text-sm text-gray-600">Deadline: {deadline}</span>
+          <span className="text-sm">
+            {" "}
+            <span className="font-semibold">Deadline:</span> {deadline}
+          </span>
           <span className="px-3 py-1 text-[10px] text-blue-800 uppercase bg-blue-200 rounded-full font-medium">
             {category}
           </span>
@@ -86,29 +91,32 @@ const JobDetails = () => {
         <div>
           <p className="mt-2 text-lg font-semibold">{jobTitle}</p>
           <p className="mt-2 text-sm text-gray-600">{description}</p>
-          <p className="mt-6 text-sm font-bold text-gray-600">
-            Employer Details:
-          </p>
-          <div className="flex items-center gap-5">
+          <p className="mt-6 text-sm font-bold">Buyer Details:</p>
+          <div className="flex items-center gap-5 mb-7">
             <div>
-              <p className="mt-2 text-sm text-gray-600">Name: N/A</p>
-              <p className="mt-2 text-sm text-gray-600">Email: {buyerEmail}</p>
+              <p className=" text-sm">
+                <span className="font-semibold">Name: </span> {buyer?.name}
+              </p>
+              <p className=" text-sm">
+                <span className="font-semibold">Email: </span> {buyer?.email}
+              </p>
             </div>
             <div className="rounded-full object-cover overflow-hidden w-14 h-14">
-              {user?.photoURL ? (
+              {buyer?.photo ? (
                 <img
                   referrerPolicy="no-referrer"
                   className="rounded-full border border-black"
-                  src={user?.photoURL}
-                  alt="Employer Photo"
+                  src={buyer?.photo}
+                  alt="Buyer Photo"
                 />
               ) : (
                 <FaRegUserCircle size={40} />
               )}
             </div>
           </div>
-          <p className="text-gray-700 font-semibold">
-            Budget: ${minPrice} - ${maxPrice}
+          <p className="">
+            <span className="font-semibold">Budget: </span> ${minPrice} - $
+            {maxPrice}
           </p>
         </div>
       </div>
