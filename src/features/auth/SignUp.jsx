@@ -1,6 +1,6 @@
 import { useState } from "react";
 import useAuth from "./useAuth";
-import { Link, useNavigate } from "react-router";
+import { Link, Navigate, useLocation, useNavigate } from "react-router";
 import { useForm } from "react-hook-form";
 import toast from "react-hot-toast";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
@@ -8,8 +8,9 @@ import SocialSignIn from "../../components/ui/SocialSignIn";
 
 const SignUp = () => {
   const [showPass, setShowPass] = useState(true);
-  const { createUser, updateUserProfile } = useAuth();
+  const { createUser, updateUserProfile, user, loading } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
 
   const {
     register,
@@ -39,11 +40,14 @@ const SignUp = () => {
     createUser(email, password).then(() => {
       updateUserProfile(fullName, image).then(() => {
         toast.success("Sign up successful! Welcome aboard!");
-        navigate("/");
-        
+        navigate(location?.state || "/", { replace: true });
       });
     });
   };
+
+  if (user || loading) {
+    return <Navigate to={"/"}></Navigate>;
+  }
 
   return (
     <div className="mb-10">

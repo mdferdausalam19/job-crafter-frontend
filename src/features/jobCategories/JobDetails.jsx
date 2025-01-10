@@ -1,7 +1,7 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
-import { useParams } from "react-router";
+import { useNavigate, useParams } from "react-router";
 import useAuth from "../auth/useAuth";
 import { FaRegUserCircle } from "react-icons/fa";
 import toast from "react-hot-toast";
@@ -10,6 +10,7 @@ const JobDetails = () => {
   const { user } = useAuth();
   const { id } = useParams();
   const [jobDetails, setJobDetails] = useState();
+  const navigate = useNavigate();
 
   useEffect(() => {
     axios
@@ -68,6 +69,7 @@ const JobDetails = () => {
       .then((res) => {
         if (res.data.insertedId) {
           toast.success("Your bid has been successfully submitted!");
+          navigate("/my-bids");
           reset();
         }
       })

@@ -131,10 +131,14 @@ const Header = () => {
                   </Link>
                 </li>
                 <li>
-                  <Link className="btn btn-sm">My Bids</Link>
+                  <Link to={"/my-bids"} className="btn btn-sm">
+                    My Bids
+                  </Link>
                 </li>
                 <li>
-                  <Link className="btn btn-sm">Bid Requests</Link>
+                  <Link to={"/bid-requests"} className="btn btn-sm">
+                    Bid Requests
+                  </Link>
                 </li>
                 <li>
                   <button onClick={handleSignOut} className="btn btn-sm">

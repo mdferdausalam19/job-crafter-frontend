@@ -1,14 +1,15 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import useAuth from "./useAuth";
-import { Link, useNavigate } from "react-router";
+import { Link, Navigate, useLocation, useNavigate } from "react-router";
 import { useForm } from "react-hook-form";
 import toast from "react-hot-toast";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import SocialSignIn from "../../components/ui/SocialSignIn";
 
 const SignIn = () => {
-  const[showPass, setShowPass] = useState(true);
-  const { signInUser } = useAuth();
+  const [showPass, setShowPass] = useState(true);
+  const { signInUser, user, loading } = useAuth();
+  const location = useLocation();
   const navigate = useNavigate();
   const {
     register,
@@ -21,7 +22,7 @@ const SignIn = () => {
     signInUser(email, password)
       .then(() => {
         toast.success("Sign in successful! Welcome back!");
-        navigate("/");
+        navigate(location?.state || "/", { replace: true });
       })
       .catch((error) => {
         if (error.code == "auth/invalid-credential") {
@@ -31,6 +32,10 @@ const SignIn = () => {
         }
       });
   };
+
+  if (user || loading) {
+    return <Navigate to={"/"}></Navigate>;
+  }
 
   return (
     <div className="mb-10">

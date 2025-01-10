@@ -46,7 +46,7 @@ const MyPostedJobs = () => {
   return (
     <div className="mb-10">
       <div className="text-center mt-5 mb-5 space-y-4">
-        <h1 className="text-2xl font-bold">Your Posted Jobs</h1>
+        <h1 className="text-2xl font-bold">My Posted Jobs</h1>
         <p className="text-gray-600">
           Manage all the jobs you have posted. Update or delete jobs easily.
         </p>
@@ -72,7 +72,17 @@ const MyPostedJobs = () => {
                 <td>
                   ${job?.minPrice} - ${job?.maxPrice}
                 </td>
-                <td>{job?.category}</td>
+                <td
+                  className={`${
+                    job?.category === "Web Development" && "text-blue-500"
+                  } ${
+                    job?.category === "Graphic Design" && "text-emerald-500"
+                  } ${
+                    job?.category === "Digital Marketing" && "text-pink-500"
+                  }`}
+                >
+                  {job?.category}
+                </td>
                 <td className="space-y-2">
                   <Link
                     to={`/update-job/${job._id}`}
