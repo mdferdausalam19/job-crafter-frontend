@@ -9,7 +9,10 @@ const BidRequests = () => {
 
   useEffect(() => {
     axios
-      .get(`${import.meta.env.VITE_API_URL}/bid-requests?email=${user?.email}`)
+      .get(
+        `${import.meta.env.VITE_API_URL}/bid-requests?email=${user?.email}`,
+        { withCredentials: true }
+      )
       .then((res) => setBids(res?.data));
   }, [user]);
 

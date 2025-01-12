@@ -10,7 +10,8 @@ const MyPostedJobs = () => {
   useEffect(() => {
     axios
       .get(
-        `${import.meta.env.VITE_API_URL}/my-posted-jobs?email=${user?.email}`
+        `${import.meta.env.VITE_API_URL}/my-posted-jobs?email=${user?.email}`,
+        { withCredentials: true }
       )
       .then((res) => {
         setJobs(res.data);
