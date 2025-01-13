@@ -53,15 +53,13 @@ const AuthProvider = ({ children }) => {
       setUser(currentUser || null);
       setLoading(false);
       if (currentUser) {
-        axios
-          .post(
-            `${import.meta.env.VITE_API_URL}/jwt`,
-            {
-              email: userEmail,
-            },
-            { withCredentials: true }
-          )
-          .then((res) => console.log(res.data));
+        axios.post(
+          `${import.meta.env.VITE_API_URL}/jwt`,
+          {
+            email: userEmail,
+          },
+          { withCredentials: true }
+        );
       } else {
         axios.get(`${import.meta.env.VITE_API_URL}/sign-out`, {
           withCredentials: true,

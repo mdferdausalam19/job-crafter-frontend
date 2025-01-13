@@ -2,18 +2,18 @@ import axios from "axios";
 import { useEffect, useState } from "react";
 import useAuth from "../auth/useAuth";
 import toast from "react-hot-toast";
+import useAxiosSecure from "../../hooks/useAxiosSecure";
 
 const MyBids = () => {
   const { user } = useAuth();
   const [bids, setBids] = useState([]);
+  const axiosSecure = useAxiosSecure();
 
   useEffect(() => {
-    axios
-      .get(`${import.meta.env.VITE_API_URL}/my-bids?email=${user?.email}`, {
-        withCredentials: true,
-      })
+    axiosSecure
+      .get(`/my-bids?email=${user?.email}`)
       .then((res) => setBids(res?.data));
-  }, [user]);
+  }, [user, axiosSecure]);
 
   const handleStatus = (id, status) => {
     axios

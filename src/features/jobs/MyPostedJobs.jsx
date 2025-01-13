@@ -1,22 +1,19 @@
-import axios from "axios";
 import { useEffect, useState } from "react";
 import useAuth from "../auth/useAuth";
 import Swal from "sweetalert2";
 import { Link } from "react-router";
+import useAxiosSecure from "../../hooks/useAxiosSecure";
+import axios from "axios";
 
 const MyPostedJobs = () => {
+  const axiosSecure = useAxiosSecure();
   const { user } = useAuth();
   const [jobs, setJobs] = useState([]);
   useEffect(() => {
-    axios
-      .get(
-        `${import.meta.env.VITE_API_URL}/my-posted-jobs?email=${user?.email}`,
-        { withCredentials: true }
-      )
-      .then((res) => {
-        setJobs(res.data);
-      });
-  }, [user]);
+    axiosSecure.get(`/my-posted-jobs?email=${user?.email}`).then((res) => {
+      setJobs(res.data);
+    });
+  }, [user, axiosSecure]);
   const handleDeleteJob = (id) => {
     Swal.fire({
       title: "Delete Job",
