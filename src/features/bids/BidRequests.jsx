@@ -3,48 +3,79 @@ import { useEffect, useState } from "react";
 import useAuth from "../auth/useAuth";
 import toast from "react-hot-toast";
 import useAxiosSecure from "../../hooks/useAxiosSecure";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import LoadingSpinner from "../../components/ui/LoadingSpinner";
 
 const BidRequests = () => {
   const { user } = useAuth();
-  const [bids, setBids] = useState([]);
+  // const [bids, setBids] = useState([]);
   const axiosSecure = useAxiosSecure();
+  const queryClient = useQueryClient();
 
-  useEffect(() => {
-    axiosSecure
-      .get(`/bid-requests?email=${user?.email}`)
-      .then((res) => setBids(res?.data));
-  }, [user, axiosSecure]);
+  const {
+    data: bids = [],
+    refetch,
+    isLoading,
+    isError,
+    error,
+  } = useQuery({
+    queryKey: ["bidRequests", user?.email],
+    queryFn: () =>
+      axiosSecure
+        .get(`/bid-requests?email=${user?.email}`)
+        .then((res) => res?.data),
+  });
 
-  const handleStatus = (id, previousStatus, currentStatus) => {
-    if (previousStatus === currentStatus) {
-      return toast.error(
-        "This action is not permitted as the status is already set."
-      );
-    }
-    axios
-      .patch(`${import.meta.env.VITE_API_URL}/bid-status/${id}`, {
+  // useEffect(() => {
+  //   axiosSecure
+  //     .get(`/bid-requests?email=${user?.email}`)
+  //     .then((res) => setBids(res?.data));
+  // }, [user, axiosSecure]);
+
+  const { mutateAsync } = useMutation({
+    mutationFn: async ({ id, currentStatus }) => {
+      await axios.patch(`${import.meta.env.VITE_API_URL}/bid-status/${id}`, {
         status: currentStatus,
-      })
-      .then((res) => {
-        if (res?.data?.modifiedCount > 0) {
-          if (currentStatus === "In Progress") {
-            toast.success(
-              "You have successfully accepted the bid request. Work in progress!"
-            );
-          } else if (currentStatus === "Rejected") {
-            toast.success("You have successfully rejected the bid request.");
-          }
-          setBids(
-            bids.map((bid) =>
-              bid._id === id ? { ...bid, status: currentStatus } : bid
-            )
-          );
-        }
-      })
-      .catch(() =>
-        toast.error("Failed to update the bid request. Please try again.")
-      );
+      });
+    },
+    onSuccess: () => {
+      toast.success("Status updated successfully!");
+      // refetch();
+      queryClient.invalidateQueries({ queryKey: ["bidRequests"] });
+    },
+    onError: (err) => {
+      toast.error(`Failed to update the bid request. Please try again.`);
+    },
+  });
+
+  const handleStatus = async (id, previousStatus, currentStatus) => {
+    if (previousStatus === currentStatus) {
+      toast.error("This action is not permitted as the status is already set.");
+      return;
+    }
+    // axios
+    //   .patch(`${import.meta.env.VITE_API_URL}/bid-status/${id}`, {
+    //     status: currentStatus,
+    //   })
+    //   .then((res) => {
+    //     if (res?.data?.modifiedCount > 0) {
+    //       toast.success("Status updated successfully!");
+    //       setBids(
+    //         bids.map((bid) =>
+    //           bid._id === id ? { ...bid, status: currentStatus } : bid
+    //         )
+    //       );
+    //     }
+    //   })
+    //   .catch(() =>
+    //     toast.error("Failed to update the bid request. Please try again.")
+    //   );
+    await mutateAsync({ id, currentStatus });
   };
+
+  if (isLoading) {
+    return <LoadingSpinner></LoadingSpinner>;
+  }
 
   return (
     <div className="mb-10">

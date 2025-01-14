@@ -73,7 +73,10 @@ const JobDetails = () => {
           reset();
         }
       })
-      .catch(() => toast.error("Failed to submit the bid!"));
+      .catch((error) => {
+        toast.error(error?.response?.data || "Failed to submit the bid!");
+        reset();
+      });
   };
 
   return (
