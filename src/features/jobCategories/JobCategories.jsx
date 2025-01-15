@@ -4,6 +4,7 @@ import JobCategoryCard from "./JobCategoryCard";
 import { useEffect, useState } from "react";
 import axios from "axios";
 import LoadingSpinner from "../../components/ui/LoadingSpinner";
+import toast from "react-hot-toast";
 
 const categories = ["Web Development", "Graphic Design", "Digital Marketing"];
 
@@ -34,11 +35,7 @@ const JobCategories = () => {
   }
 
   if (error) {
-    return (
-      <div className="text-center mt-10">
-        <p className="text-red-500 font-semibold">{error}</p>
-      </div>
-    );
+    return toast.error(error);
   }
 
   return (

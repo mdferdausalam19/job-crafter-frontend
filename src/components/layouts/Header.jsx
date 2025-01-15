@@ -43,7 +43,7 @@ const Header = () => {
             </li>
 
             <li>
-              <Link className="btn btn-sm" to={"/"}>
+              <Link className="btn btn-sm" to={"/all-jobs"}>
                 All Jobs
               </Link>
             </li>
@@ -78,7 +78,7 @@ const Header = () => {
           </li>
 
           <li>
-            <Link className="btn btn-sm" to={"/"}>
+            <Link to={"/all-jobs"} className="btn btn-sm">
               All Jobs
             </Link>
           </li>
