@@ -1,39 +1,48 @@
 import axios from "axios";
-import { useEffect, useState } from "react";
 import useAuth from "../auth/useAuth";
 import toast from "react-hot-toast";
 import useAxiosSecure from "../../hooks/useAxiosSecure";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import LoadingSpinner from "../../components/ui/LoadingSpinner";
 
 const MyBids = () => {
   const { user } = useAuth();
-  const [bids, setBids] = useState([]);
   const axiosSecure = useAxiosSecure();
+  const queryClient = useQueryClient();
 
-  useEffect(() => {
-    axiosSecure
-      .get(`/my-bids?email=${user?.email}`)
-      .then((res) => setBids(res?.data));
-  }, [user, axiosSecure]);
+  const { data: bids = [], isLoading } = useQuery({
+    queryKey: ["myBids", user?.email],
+    queryFn: async () =>
+      await axiosSecure
+        .get(`/my-bids?email=${user?.email}`)
+        .then((res) => res?.data),
+  });
 
-  const handleStatus = (id, status) => {
-    axios
-      .patch(`${import.meta.env.VITE_API_URL}/bid-status/${id}`, {
+  const { mutateAsync } = useMutation({
+    mutationFn: async ({ id, status }) =>
+      await axios.patch(`${import.meta.env.VITE_API_URL}/bid-status/${id}`, {
         status,
-      })
-      .then((res) => {
-        if (res?.data?.modifiedCount > 0) {
-          toast.success(
-            "Congratulations! You’ve successfully marked the task as complete."
-          );
-          setBids(
-            bids.map((bid) => (bid._id === id ? { ...bid, status } : bid))
-          );
-        }
-      })
-      .catch(() =>
-        toast.error("Unable to update the bid status. Please try again.")
-      );
+      }),
+    onSuccess: ({ data }) => {
+      if (data?.modifiedCount > 0) {
+        toast.success(
+          "Congratulations! You’ve successfully marked the task as complete."
+        );
+      }
+      queryClient.invalidateQueries({ queryKey: ["myBids"] });
+    },
+    onError: () => {
+      toast.error("Unable to update the bid status. Please try again.");
+    },
+  });
+
+  const handleStatus = async (id, status) => {
+    await mutateAsync({ id, status });
   };
+
+  if (isLoading) {
+    return <LoadingSpinner></LoadingSpinner>;
+  }
 
   return (
     <div className="mb-10">

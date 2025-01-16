@@ -1,19 +1,45 @@
-import { useEffect, useState } from "react";
 import useAuth from "../auth/useAuth";
 import Swal from "sweetalert2";
 import { Link } from "react-router";
 import useAxiosSecure from "../../hooks/useAxiosSecure";
 import axios from "axios";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import LoadingSpinner from "../../components/ui/LoadingSpinner";
+import toast from "react-hot-toast";
 
 const MyPostedJobs = () => {
-  const axiosSecure = useAxiosSecure();
   const { user } = useAuth();
-  const [jobs, setJobs] = useState([]);
-  useEffect(() => {
-    axiosSecure.get(`/my-posted-jobs?email=${user?.email}`).then((res) => {
-      setJobs(res.data);
-    });
-  }, [user, axiosSecure]);
+  const axiosSecure = useAxiosSecure();
+  const queryClient = useQueryClient();
+
+  const { data: jobs = [], isLoading } = useQuery({
+    queryKey: ["myPostedJobs", user?.email],
+    queryFn: async () =>
+      await axiosSecure
+        .get(`/my-posted-jobs?email=${user?.email}`)
+        .then((res) => res?.data),
+  });
+
+  const { mutateAsync } = useMutation({
+    mutationFn: async ({ id }) =>
+      await axios.delete(`${import.meta.env.VITE_API_URL}/jobs/${id}`),
+    onSuccess: async ({ data }) => {
+      if (data?.deletedCount === 1) {
+        Swal.fire({
+          title: "Deleted!",
+          text: "Your job has been successfully deleted.",
+          icon: "success",
+        });
+      }
+      queryClient.invalidateQueries({
+        queryKey: ["myPostedJobs"],
+      });
+    },
+    onError: (err) => {
+      toast.error(`Failed to delete the job. Please try again.`);
+    },
+  });
+
   const handleDeleteJob = (id) => {
     Swal.fire({
       title: "Delete Job",
@@ -23,24 +49,17 @@ const MyPostedJobs = () => {
       confirmButtonColor: "#3085d6",
       cancelButtonColor: "#d33",
       confirmButtonText: "Yes, Delete!",
-    }).then((result) => {
+    }).then(async (result) => {
       if (result.isConfirmed) {
-        axios
-          .delete(`${import.meta.env.VITE_API_URL}/jobs/${id}`)
-          .then((res) => {
-            if (res.data.deletedCount === 1) {
-              const remainingJobs = jobs.filter((job) => job._id !== id);
-              setJobs(remainingJobs);
-              Swal.fire({
-                title: "Deleted!",
-                text: "Your job has been successfully deleted.",
-                icon: "success",
-              });
-            }
-          });
+        await mutateAsync({ id });
       }
     });
   };
+
+  if (isLoading) {
+    return <LoadingSpinner></LoadingSpinner>;
+  }
+
   return (
     <div className="mb-10">
       <div className="text-center mt-5 mb-5 space-y-4">

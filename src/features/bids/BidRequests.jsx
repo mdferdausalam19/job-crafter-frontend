@@ -16,8 +16,6 @@ const BidRequests = () => {
     data: bids = [],
     refetch,
     isLoading,
-    isError,
-    error,
   } = useQuery({
     queryKey: ["bidRequests", user?.email],
     queryFn: () =>
@@ -33,13 +31,14 @@ const BidRequests = () => {
   // }, [user, axiosSecure]);
 
   const { mutateAsync } = useMutation({
-    mutationFn: async ({ id, currentStatus }) => {
+    mutationFn: async ({ id, currentStatus }) =>
       await axios.patch(`${import.meta.env.VITE_API_URL}/bid-status/${id}`, {
         status: currentStatus,
-      });
-    },
-    onSuccess: () => {
-      toast.success("Status updated successfully!");
+      }),
+    onSuccess: ({ data }) => {
+      if (data?.modifiedCount > 0) {
+        toast.success("Status updated successfully!");
+      }
       // refetch();
       queryClient.invalidateQueries({ queryKey: ["bidRequests"] });
     },
@@ -121,7 +120,7 @@ const BidRequests = () => {
                 </td>
                 <td>
                   <p
-                    className={`py-1 rounded-full ${
+                    className={`py-1 ${
                       bid?.status === "Pending" && "text-yellow-500"
                     } ${bid?.status === "In Progress" && "text-blue-500"} ${
                       bid?.status === "Complete" && "text-green-500"
