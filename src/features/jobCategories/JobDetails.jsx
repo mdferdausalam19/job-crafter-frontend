@@ -14,7 +14,7 @@ const JobDetails = () => {
 
   useEffect(() => {
     axios
-      .get(`${import.meta.env.VITE_API_URL}/jobs/${id}`)
+      .get(`${import.meta.env.VITE_API_URL}/job-details/${id}`)
       .then((response) => setJobDetails(response?.data))
       .catch((error) => toast.error("Failed to fetch job details!"));
   }, [id]);
@@ -82,7 +82,7 @@ const JobDetails = () => {
   return (
     <div className="flex flex-col md:flex-row justify-around gap-5 items-center min-h-[calc(100vh-306px)] md:max-w-screen-xl mb-10 mx-auto">
       {/* Job Details */}
-      <div className="flex-1 px-4 py-7 bg-white rounded-md shadow-md md:min-h-[350px] border">
+      <div className="flex-1 px-4 py-7 bg-white rounded-md shadow-md md:min-h-[350px] border w-full">
         <div className="flex items-center justify-between">
           <span className="text-sm">
             {" "}

@@ -18,8 +18,8 @@ const BidRequests = () => {
     isLoading,
   } = useQuery({
     queryKey: ["bidRequests", user?.email],
-    queryFn: () =>
-      axiosSecure
+    queryFn: async () =>
+      await axiosSecure
         .get(`/bid-requests?email=${user?.email}`)
         .then((res) => res?.data),
   });
@@ -42,7 +42,7 @@ const BidRequests = () => {
       // refetch();
       queryClient.invalidateQueries({ queryKey: ["bidRequests"] });
     },
-    onError: (err) => {
+    onError: () => {
       toast.error(`Failed to update the bid request. Please try again.`);
     },
   });

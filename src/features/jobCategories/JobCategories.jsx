@@ -1,41 +1,28 @@
 import { Tab, Tabs, TabList, TabPanel } from "react-tabs";
 import "react-tabs/style/react-tabs.css";
 import JobCategoryCard from "./JobCategoryCard";
-import { useEffect, useState } from "react";
 import axios from "axios";
 import LoadingSpinner from "../../components/ui/LoadingSpinner";
 import toast from "react-hot-toast";
+import { useQuery } from "@tanstack/react-query";
 
 const categories = ["Web Development", "Graphic Design", "Digital Marketing"];
 
 const JobCategories = () => {
-  const [jobs, setJobs] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
 
-  useEffect(() => {
-    const fetchJobs = async () => {
-      try {
-        const response = await axios.get(
-          `${import.meta.env.VITE_API_URL}/jobs`
-        );
-        setJobs(response.data);
-      } catch (err) {
-        setError("Failed to fetch jobs. Please try again later.");
-      } finally {
-        setLoading(false);
-      }
-    };
+  const { data: jobs = [], isLoading } = useQuery({
+    queryKey: ["jobs"],
+    queryFn: async () =>
+      await axios
+        .get(`${import.meta.env.VITE_API_URL}/jobs`)
+        .then((res) => res?.data)
+        .catch(() =>
+          toast.error("Failed to fetch jobs. Please try again later.")
+        ),
+  });
 
-    fetchJobs();
-  }, []);
-
-  if (loading) {
+  if (isLoading) {
     return <LoadingSpinner></LoadingSpinner>;
-  }
-
-  if (error) {
-    return toast.error(error);
   }
 
   return (

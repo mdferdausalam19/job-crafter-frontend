@@ -35,7 +35,7 @@ const MyPostedJobs = () => {
         queryKey: ["myPostedJobs"],
       });
     },
-    onError: (err) => {
+    onError: () => {
       toast.error(`Failed to delete the job. Please try again.`);
     },
   });

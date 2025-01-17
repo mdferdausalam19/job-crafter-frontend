@@ -1,14 +1,16 @@
 import { useForm } from "react-hook-form";
 import useAuth from "../auth/useAuth";
-import { useEffect, useState } from "react";
-import axios from "axios";
 import toast from "react-hot-toast";
 import { useNavigate, useParams } from "react-router";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import LoadingSpinner from "../../components/ui/LoadingSpinner";
+import useAxiosSecure from "../../hooks/useAxiosSecure";
 
 const UpdateJob = () => {
-  const [job, setJob] = useState({});
   const { user } = useAuth();
   const { id } = useParams();
+  const axiosSecure = useAxiosSecure();
+  const queryClient = useQueryClient();
   const navigate = useNavigate();
   const {
     register,
@@ -17,17 +19,39 @@ const UpdateJob = () => {
     reset,
   } = useForm();
 
-  useEffect(() => {
-    axios
-      .get(`${import.meta.env.VITE_API_URL}/jobs/${id}`)
-      .then((response) => {
-        setJob(response?.data);
-        reset(response.data);
-      })
-      .catch((error) => toast.error("Failed to fetch job details!"));
-  }, [user]);
+  const { data: job = [], isLoading } = useQuery({
+    queryKey: ["updateJob", id],
+    queryFn: async () =>
+      await axiosSecure
+        .get(`/jobs/update/${id}`)
+        .then((res) => {
+          reset(res?.data);
+          return res?.data;
+        })
+        .catch((error) => {
+          toast.error(
+            error?.response?.data?.message || "Failed to fetch job details!"
+          );
+          return;
+        }),
+  });
 
-  const handleUpdateJob = (data) => {
+  const { mutateAsync } = useMutation({
+    mutationFn: async ({ jobInfo }) =>
+      await axiosSecure.put(`/jobs/${job._id}`, jobInfo),
+    onSuccess: ({ data }) => {
+      if (data?.modifiedCount > 0) {
+        toast.success("Job updated successfully!");
+        navigate("/my-posted-jobs");
+      }
+      queryClient.invalidateQueries({ queryKey: ["updateJob"] });
+    },
+    onError: () => {
+      toast.error("Unable to update the job. Please try again.");
+    },
+  });
+
+  const handleUpdateJob = async (data) => {
     const jobInfo = {
       jobTitle: data.jobTitle,
       deadline: data.deadline,
@@ -41,17 +65,13 @@ const UpdateJob = () => {
         email: user?.email,
       },
     };
-    axios
-      .put(`${import.meta.env.VITE_API_URL}/jobs/${job._id}`, jobInfo)
-      .then((res) => {
-        if (res.data.modifiedCount > 0) {
-          toast.success("Job updated successfully!");
-          reset();
-          navigate("/my-posted-jobs");
-        }
-      })
-      .catch(() => toast.error("Unable to update the job. Please try again."));
+
+    await mutateAsync({ jobInfo });
   };
+
+  if (isLoading) {
+    <LoadingSpinner></LoadingSpinner>;
+  }
 
   return (
     <div className="mt-5 md:mt-10 mb-10">

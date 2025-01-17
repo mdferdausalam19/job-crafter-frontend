@@ -3,6 +3,7 @@ import useAuth from "../auth/useAuth";
 import axios from "axios";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router";
+import { useMutation } from "@tanstack/react-query";
 
 const AddJob = () => {
   const { user } = useAuth();
@@ -13,7 +14,21 @@ const AddJob = () => {
     formState: { errors },
     reset,
   } = useForm();
-  const handleAddJob = (data) => {
+  const { mutateAsync } = useMutation({
+    mutationFn: async ({ jobInfo }) =>
+      await axios.post(`${import.meta.env.VITE_API_URL}/jobs`, jobInfo),
+    onSuccess: ({ data }) => {
+      if (data?.insertedId) {
+        toast.success("Job posted successfully!");
+        reset();
+        navigate("/my-posted-jobs");
+      }
+    },
+    onError: () => {
+      toast.error("Unable to post the job. Please try again.");
+    },
+  });
+  const handleAddJob = async (data) => {
     const jobInfo = {
       jobTitle: data.jobTitle,
       deadline: data.deadline,
@@ -28,16 +43,8 @@ const AddJob = () => {
       },
       bidCount: 0,
     };
-    axios
-      .post(`${import.meta.env.VITE_API_URL}/jobs`, jobInfo)
-      .then((res) => {
-        if (res.data.insertedId) {
-          toast.success("Job posted successfully!");
-          reset();
-          navigate("/my-posted-jobs");
-        }
-      })
-      .catch(() => toast.error("Unable to post the job. Please try again."));
+
+    await mutateAsync({ jobInfo });
   };
   return (
     <div className="mt-5 md:mt-10 mb-10">

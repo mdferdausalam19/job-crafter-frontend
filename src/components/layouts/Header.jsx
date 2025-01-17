@@ -4,10 +4,10 @@ import { FaRegUserCircle } from "react-icons/fa";
 import toast from "react-hot-toast";
 
 const Header = () => {
-  const { user, signOutUser } = useAuth();
+  const { user, signOutUser, loading } = useAuth();
   const navigate = useNavigate();
-  const handleSignOut = () => {
-    signOutUser().then(() => {
+  const handleSignOut = async () => {
+    await signOutUser().then(() => {
       toast.success("Sign out successful.");
       navigate("/sign-in");
     });
@@ -84,70 +84,80 @@ const Header = () => {
           </li>
         </ul>
       </div>
+
       <div className="navbar-end">
-        {!user && (
-          <div className="hidden lg:flex">
-            <Link to={"/sign-in"} className="btn btn-sm mr-3">
-              Sign In
-            </Link>
-            <Link to={"/sign-up"} className="btn btn-sm  mr-3">
-              Sign Up
-            </Link>
-          </div>
-        )}
-        {user && (
-          <div className="flex-none">
-            <div className="dropdown dropdown-end">
-              <div
-                tabIndex={0}
-                role="button"
-                className="btn btn-ghost btn-circle avatar"
-              >
-                <div className="w-10 rounded-full" title={user?.displayName}>
-                  {user?.photoURL ? (
-                    <img
-                      referrerPolicy="no-referrer"
-                      className="w-10 rounded-full border border-black"
-                      src={user?.photoURL}
-                      alt="Users Photo"
-                    />
-                  ) : (
-                    <FaRegUserCircle size={40} />
-                  )}
+        {loading ? (
+          ""
+        ) : (
+          <>
+            {!user && (
+              <div className="hidden lg:flex">
+                <Link to={"/sign-in"} className="btn btn-sm mr-3">
+                  Sign In
+                </Link>
+                <Link to={"/sign-up"} className="btn btn-sm  mr-3">
+                  Sign Up
+                </Link>
+              </div>
+            )}
+            {user && (
+              <div className="flex-none">
+                <div className="dropdown dropdown-end">
+                  <div
+                    tabIndex={0}
+                    role="button"
+                    className="btn btn-ghost btn-circle avatar"
+                  >
+                    <div
+                      className="w-10 rounded-full"
+                      title={user?.displayName}
+                    >
+                      {user?.photoURL ? (
+                        <img
+                          referrerPolicy="no-referrer"
+                          className="w-10 rounded-full border border-black"
+                          src={user?.photoURL}
+                          alt="Users Photo"
+                        />
+                      ) : (
+                        <FaRegUserCircle size={40} />
+                      )}
+                    </div>
+                  </div>
+                  <ul
+                    tabIndex={0}
+                    className="menu menu-sm dropdown-content bg-base-100 rounded-box z-[1] mt-3 w-52 p-2 shadow space-y-2"
+                  >
+                    <li>
+                      <Link to={"/add-job"} className="btn btn-sm">
+                        Add Job
+                      </Link>
+                    </li>
+                    <li>
+                      <Link to={"/my-posted-jobs"} className="btn btn-sm">
+                        My Posted Jobs
+                      </Link>
+                    </li>
+                    <li>
+                      <Link to={"/my-bids"} className="btn btn-sm">
+                        My Bids
+                      </Link>
+                    </li>
+                    <li>
+                      <Link to={"/bid-requests"} className="btn btn-sm">
+                        Bid Requests
+                      </Link>
+                    </li>
+                    <li>
+                      <button onClick={handleSignOut} className="btn btn-sm">
+                        Sign Out
+                      </button>
+                    </li>
+                  </ul>
                 </div>
               </div>
-              <ul
-                tabIndex={0}
-                className="menu menu-sm dropdown-content bg-base-100 rounded-box z-[1] mt-3 w-52 p-2 shadow space-y-2"
-              >
-                <li>
-                  <Link to={"/add-job"} className="btn btn-sm">
-                    Add Job
-                  </Link>
-                </li>
-                <li>
-                  <Link to={"/my-posted-jobs"} className="btn btn-sm">
-                    My Posted Jobs
-                  </Link>
-                </li>
-                <li>
-                  <Link to={"/my-bids"} className="btn btn-sm">
-                    My Bids
-                  </Link>
-                </li>
-                <li>
-                  <Link to={"/bid-requests"} className="btn btn-sm">
-                    Bid Requests
-                  </Link>
-                </li>
-                <li>
-                  <button onClick={handleSignOut} className="btn btn-sm">
-                    Sign Out
-                  </button>
-                </li>
-              </ul>
-            </div>
-          </div>
+            )}
+          </>
         )}
       </div>
     </div>

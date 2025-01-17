@@ -1,51 +1,50 @@
 import axios from "axios";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import LoadingSpinner from "../../components/ui/LoadingSpinner";
 import JobCategoryCard from "../jobCategories/JobCategoryCard";
 import toast from "react-hot-toast";
+import { useQuery } from "@tanstack/react-query";
 
 const AllJobs = () => {
-  const [jobs, setJobs] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [count, setCount] = useState(0);
   const [itemsPerPage, setItemsPerPage] = useState(8);
-  const numberOfPages = Math.ceil(count / itemsPerPage);
   const [currentPage, setCurrentPage] = useState(0);
   const [filter, setFilter] = useState("");
   const [searchText, setSearchText] = useState("");
   const [sort, setSort] = useState("");
 
-  useEffect(() => {
-    const getJobs = async () => {
-      try {
-        const response = await axios.get(
+  const { data: count = 0 } = useQuery({
+    queryKey: ["jobsCount", currentPage, itemsPerPage, filter, searchText],
+    queryFn: async () =>
+      await axios
+        .get(
+          `${
+            import.meta.env.VITE_API_URL
+          }/jobs-count?filter=${filter}&search=${searchText}`
+        )
+        .then((res) => res?.data?.count),
+  });
+
+  const { data: jobs = [] } = useQuery({
+    queryKey: ["allJobs", currentPage, filter, itemsPerPage, searchText, sort],
+    queryFn: async () =>
+      await axios
+        .get(
           `${
             import.meta.env.VITE_API_URL
           }/all-jobs?page=${currentPage}&size=${itemsPerPage}&filter=${filter}&sort=${sort}&search=${searchText}`
-        );
-        setJobs(response?.data);
-      } catch (err) {
-        setError("Failed to fetch jobs. Please try again later.");
-      } finally {
-        setLoading(false);
-      }
-    };
+        )
+        .then((res) => {
+          setLoading(false);
+          return res?.data;
+        })
+        .catch(() =>
+          toast.error("Failed to fetch jobs. Please try again later.")
+        ),
+  });
 
-    getJobs();
-  }, [currentPage, filter, itemsPerPage, searchText, sort]);
-
-  useEffect(() => {
-    const getJobsCount = async () => {
-      const response = await axios.get(
-        `${
-          import.meta.env.VITE_API_URL
-        }/jobs-count?filter=${filter}&search=${searchText}`
-      );
-      setCount(response?.data?.count);
-    };
-    getJobsCount();
-  }, [currentPage, itemsPerPage, filter, searchText]);
+  const numberOfPages = Math.ceil(count / itemsPerPage);
+  const pages = [...Array(numberOfPages).keys()];
 
   const handleSearch = (e) => {
     e.preventDefault();
@@ -55,20 +54,16 @@ const AllJobs = () => {
   if (loading) {
     return <LoadingSpinner></LoadingSpinner>;
   }
-  if (error) {
-    return toast.error(error);
-  }
 
-  const pages = [...Array(numberOfPages).keys()];
   return (
-    <div className="container mx-auto flex flex-col justify-between mt-10 mb-10">
+    <div className="flex flex-col justify-between mt-10 mb-10">
       <div>
-        <div className="flex flex-col md:flex-row justify-center items-center gap-5 ">
+        <div className="flex flex-col md:flex-row justify-center items-center gap-5">
           <div>
             <select
+              className="select select-bordered w-full max-w-xs"
               name="category"
               id="category"
-              className="border p-4 rounded-lg"
               onChange={(e) => {
                 setFilter(e.target?.value);
                 setCurrentPage(0);
@@ -83,27 +78,36 @@ const AllJobs = () => {
           </div>
 
           <form onSubmit={handleSearch}>
-            <div className="flex p-1 overflow-hidden border rounded-lg    focus-within:ring focus-within:ring-opacity-40 focus-within:border-blue-400 focus-within:ring-blue-300">
+            <label className="input input-bordered flex items-center gap-2">
               <input
-                className="px-6 py-2 text-gray-700 placeholder-gray-500 bg-white outline-none focus:placeholder-transparent"
                 type="text"
                 name="search"
+                className="grow"
                 placeholder="Enter Job Title"
-                aria-label="Enter Job Title"
                 onChange={(e) => setSearchText(e.target?.value)}
                 value={searchText}
               />
-
-              <button className="px-1 md:px-4 py-3 text-sm font-medium tracking-wider text-gray-100 uppercase transition-colors duration-300 transform bg-gray-700 rounded-md hover:bg-gray-600 focus:bg-gray-600 focus:outline-none">
-                Search
+              <button>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 16 16"
+                  fill="currentColor"
+                  className="h-4 w-4 opacity-70"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M9.965 11.026a5 5 0 1 1 1.06-1.06l2.755 2.754a.75.75 0 1 1-1.06 1.06l-2.755-2.754ZM10.5 7a3.5 3.5 0 1 1-7 0 3.5 3.5 0 0 1 7 0Z"
+                    clipRule="evenodd"
+                  />
+                </svg>
               </button>
-            </div>
+            </label>
           </form>
           <div>
             <select
               name="sort"
               id="sort"
-              className="border p-4 rounded-md"
+              className="select select-bordered w-full max-w-xs"
               value={sort}
               onChange={(e) => {
                 setSort(e.target?.value);
